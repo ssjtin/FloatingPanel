@@ -4,6 +4,18 @@ import UIKit
 import FloatingPanel
 
 final class ImageViewController: UIViewController {
+    let delegate = Delegate()
+    class Delegate: FloatingPanelControllerDelegate {
+        func floatingPanelDidMove(_ fpc: FloatingPanelController) {
+            print(fpc.surfaceView.bounds.height)
+            if fpc.isAttracting == false {
+                let loc = fpc.surfaceLocation
+                let minY = fpc.surfaceLocation(for: .full).y
+                let maxY = fpc.surfaceLocation(for: .half).y
+                fpc.surfaceLocation = CGPoint(x: loc.x, y: min(max(loc.y, minY), maxY))
+            }
+        }
+    }
     class PanelLayout: FloatingPanelLayout {
         weak var targetGuide: UILayoutGuide?
         init(targetGuide: UILayoutGuide?) {

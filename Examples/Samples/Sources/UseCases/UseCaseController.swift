@@ -231,6 +231,7 @@ extension UseCaseController {
                 } else {
                     fpc.layout = ImageViewController.PanelLayout(targetGuide: nil)
                 }
+                fpc.delegate = contentVC.delegate
             }
             addMain(panel: fpc)
 
