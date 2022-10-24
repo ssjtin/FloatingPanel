@@ -90,6 +90,10 @@ import UIKit
     @objc(floatingPanel:contentOffsetForPinningScrollView:)
     optional
     func floatingPanel(_ fpc: FloatingPanelController, contentOffsetForPinning trackingScrollView: UIScrollView) -> CGPoint
+
+    @objc(floatingPanel:shouldScrollTrackingScrollView:)
+    optional
+    func floatingPanel(_ fpc: FloatingPanelController, shouldScroll trackingScrollView: UIScrollView) -> Bool
 }
 
 ///

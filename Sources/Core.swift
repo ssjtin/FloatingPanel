@@ -625,6 +625,12 @@ class Core: NSObject, UIGestureRecognizerDelegate {
         if scrollView.isDecelerating {
             return true
         }
+
+        // Enable to hook the behavior for a table view in editing
+        if let vc = ownerVC, let shouldScroll = vc.delegate?.floatingPanel?(vc, shouldScroll: scrollView) {
+            return shouldScroll
+        }
+
         if let tableView = (scrollView as? UITableView), tableView.isEditing {
             return true
         }
