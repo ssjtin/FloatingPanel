@@ -573,8 +573,7 @@ class Core: NSObject, UIGestureRecognizerDelegate {
 
         guard
             state == layoutAdapter.mostExpandedState,  // When not top most(i.e. .full), don't scroll.
-            interactionInProgress == false,        // When interaction already in progress, don't scroll.
-            0 == layoutAdapter.offsetFromMostExpandedAnchor
+            interactionInProgress == false        // When interaction already in progress, don't scroll.
         else {
             return false
         }
