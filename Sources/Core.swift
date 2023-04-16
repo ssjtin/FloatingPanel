@@ -798,10 +798,16 @@ class Core: NSObject, UIGestureRecognizerDelegate {
         if state == layoutAdapter.mostExpandedState, let scrollView = scrollView {
             if surfaceView.grabberAreaContains(location) {
                 initialScrollOffset = scrollView.contentOffset
+            } else if value(of: scrollView.contentOffset) >= 0 {
+                // The condition must be out of the range defined by `allowScrollPanGesture(for:)`, [-30, 0).
+                // It can be true when a panel moves by dragging it with an overlay view,
+                // for example, a user drags a panel at the bottom of the search bar in Maps example.
+
+                initialScrollOffset = scrollView.contentOffset
             } else {
                 let pinningOffset = contentOffsetForPinning(of: scrollView)
 
-                // `scrollView.contentOffset` can be a value in [-30, 0) at this time by `allowScrollPanGesture(for:)`.
+                // `scrollView.contentOffset` can be a value in [-30, 0) at this time defined by `allowScrollPanGesture(for:)`.
                 // Therefore the initial scroll offset must be reset to the pinning offset. Otherwise, the following
                 // `Fit the surface bounds` logic don't working and also the scroll content offset can be invalid.
                 initialScrollOffset = pinningOffset
