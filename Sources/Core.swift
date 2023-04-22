@@ -714,9 +714,9 @@ class Core: NSObject, UIGestureRecognizerDelegate {
 
         let currentPos = value(of: layoutAdapter.surfaceLocation)
         let mainVelocity = value(of: velocity)
-        var targetPosition = self.targetPosition(from: currentPos, with: mainVelocity)
+        var targetState = self.targetPosition(from: currentPos, with: mainVelocity)
 
-        endInteraction(for: targetPosition)
+        endInteraction(for: targetState)
 
         if isRemovalInteractionEnabled {
             let distToHidden = CGFloat(abs(currentPos - layoutAdapter.position(for: .hidden)))
@@ -733,16 +733,16 @@ class Core: NSObject, UIGestureRecognizerDelegate {
         }
 
         if let vc = ownerVC {
-            vc.delegate?.floatingPanelWillEndDragging?(vc, withVelocity: velocity, targetState: &targetPosition)
+            vc.delegate?.floatingPanelWillEndDragging?(vc, withVelocity: velocity, targetState: &targetState)
         }
 
-        guard shouldAttract(to: targetPosition) else {
+        guard shouldAttract(to: targetState) else {
             if let vc = ownerVC {
                 vc.delegate?.floatingPanelDidEndDragging?(vc, willAttract: false)
             }
 
-            self.state = targetPosition
-            self.updateLayout(to: targetPosition)
+            self.state = targetState
+            self.updateLayout(to: targetState)
             self.unlockScrollView()
             return
         }
@@ -753,14 +753,14 @@ class Core: NSObject, UIGestureRecognizerDelegate {
 
         // Workaround: Disable a tracking scroll to prevent bouncing a scroll content in a panel animating
         let isScrollEnabled = scrollView?.isScrollEnabled
-        if let scrollView = scrollView, targetPosition != layoutAdapter.mostExpandedState {
+        if let scrollView = scrollView, targetState != layoutAdapter.mostExpandedState {
             scrollView.isScrollEnabled = false
         }
 
-        startAttraction(to: targetPosition, with: velocity)
+        startAttraction(to: targetState, with: velocity)
 
         // Workaround: Reset `self.scrollView.isScrollEnabled`
-        if let scrollView = scrollView, targetPosition != layoutAdapter.mostExpandedState,
+        if let scrollView = scrollView, targetState != layoutAdapter.mostExpandedState,
             let isScrollEnabled = isScrollEnabled {
             scrollView.isScrollEnabled = isScrollEnabled
         }
