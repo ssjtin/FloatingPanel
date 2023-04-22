@@ -480,7 +480,7 @@ class LayoutAdapter {
         }
     }
 
-    func startInteraction(at state: FloatingPanelState, offset: CGPoint = .zero) {
+    func startInteraction(at state: FloatingPanelState, offset: CGFloat = 0) {
         if let constraint = interactionConstraint {
             initialConst = constraint.constant
             return
@@ -490,7 +490,7 @@ class LayoutAdapter {
 
         NSLayoutConstraint.deactivate(stateConstraints.flatMap { $1 } + offConstraints)
 
-        initialConst = edgePosition(surfaceView.frame) + offset.y
+        initialConst = edgePosition(surfaceView.frame) + offset
 
         let constraint: NSLayoutConstraint
         switch position {

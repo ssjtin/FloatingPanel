@@ -395,7 +395,7 @@ class Core: NSObject, UIGestureRecognizerDelegate {
                 location = \(value(of: location)), velocity = \(velocity)
                 """)
 
-            let offsetDiff = value(of: scrollView.contentOffset - contentOffsetForPinning(of: scrollView))
+            let offsetDiff = offsetFromPinning(scrollView: scrollView)
 
             if insideMostExpandedAnchor {
                 // Scroll offset pinning
@@ -596,7 +596,7 @@ class Core: NSObject, UIGestureRecognizerDelegate {
             return false
         }
 
-        let offset = value(of: scrollView.contentOffset - contentOffsetForPinning(of: scrollView))
+        let offset = offsetFromPinning(scrollView: scrollView)
         // The zero offset must be excluded because the offset is usually zero
         // after a panel moves from half/tip to full.
         switch layoutAdapter.position {
@@ -791,13 +791,13 @@ class Core: NSObject, UIGestureRecognizerDelegate {
         log.debug("startInteraction  -- translation = \(value(of: translation)), location = \(value(of: location))")
         guard interactionInProgress == false else { return }
 
-        var offset: CGPoint = .zero
+        var offset = 0.0
 
         initialSurfaceLocation = layoutAdapter.surfaceLocation
         if state == layoutAdapter.mostExpandedState, let scrollView = scrollView {
             if surfaceView.grabberAreaContains(location) {
                 initialScrollOffset = scrollView.contentOffset
-            } else if value(of: scrollView.contentOffset) >= 0 {
+            } else if distanceFromPinning(scrollView: scrollView) >= 0 {
                 // The condition must be out of the range defined by `allowScrollPanGesture(for:)`, [-30, 0).
                 // It can be true when a panel moves by dragging it with an overlay view,
                 // for example, a user drags a panel at the bottom of the search bar in Maps example.
@@ -812,14 +812,14 @@ class Core: NSObject, UIGestureRecognizerDelegate {
                 initialScrollOffset = pinningOffset
 
                 // Fit the surface bounds to a scroll offset content by startInteraction(at:offset:)
-                let offsetDiff = scrollView.contentOffset - pinningOffset
+                let offsetDiff = offsetFromPinning(scrollView: scrollView)
                 switch layoutAdapter.position {
                 case .top, .left:
-                    if value(of: offsetDiff) > 0 {
+                    if offsetDiff > 0 {
                         offset = -offsetDiff
                     }
                 case .bottom, .right:
-                    if value(of: offsetDiff) < 0 {
+                    if offsetDiff < 0 {
                         offset = -offsetDiff
                     }
                 }
@@ -1075,16 +1075,25 @@ class Core: NSObject, UIGestureRecognizerDelegate {
         }
     }
 
-    private func allowScrollPanGesture(for scrollView: UIScrollView) -> Bool {
-        guard state == layoutAdapter.mostExpandedState else { return false }
-        var offsetY: CGFloat = 0
+    private func offsetFromPinning(scrollView: UIScrollView) -> CGFloat {
+        return value(of: scrollView.contentOffset - contentOffsetForPinning(of: scrollView))
+    }
+
+    private func distanceFromPinning(scrollView: UIScrollView) -> CGFloat {
+        var offset = offsetFromPinning(scrollView: scrollView)
         switch layoutAdapter.position {
         case .top, .left:
-            offsetY = value(of: scrollView.fp_contentOffsetMax - scrollView.contentOffset)
+            offset = -offset
         case .bottom, .right:
-            offsetY = value(of: scrollView.contentOffset - contentOffsetForPinning(of: scrollView))
+            break;
         }
-        return offsetY <= -30.0 || offsetY > 0
+        return offset
+    }
+
+    private func allowScrollPanGesture(for scrollView: UIScrollView) -> Bool {
+        guard state == layoutAdapter.mostExpandedState else { return false }
+        var offset = distanceFromPinning(scrollView: scrollView)
+        return offset <= -30.0 || offset > 0
     }
 
     // MARK: - UIPanGestureRecognizer Intermediation
