@@ -703,18 +703,25 @@ class Core: NSObject, UIGestureRecognizerDelegate {
             return
         }
 
-        stopScrollDeceleration = (0 > layoutAdapter.offsetFromMostExpandedAnchor + (1.0 / surfaceView.fp_displayScale)) // Projecting the dragging to the scroll dragging or not
-        if stopScrollDeceleration {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                
-                self.stopScrolling(at: self.initialScrollOffset)
-            }
-        }
-
         let currentPos = value(of: layoutAdapter.surfaceLocation)
         let mainVelocity = value(of: velocity)
         var targetState = self.targetPosition(from: currentPos, with: mainVelocity)
+
+        var stopScrollDeceleration: Bool {
+            if targetState == layoutAdapter.mostExpandedState {
+                return (0 >= layoutAdapter.offsetFromMostExpandedAnchor + (1.0 / surfaceView.fp_displayScale)) // Projecting the dragging to the scroll dragging or not
+            } else {
+                // Stop unexpected scroll bounces after panning a panel from full to another state.
+                return true
+            }
+        }
+        if stopScrollDeceleration {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+
+                self.stopScrolling(at: self.initialScrollOffset)
+            }
+        }
 
         endInteraction(for: targetState)
 
